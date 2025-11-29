@@ -4,6 +4,7 @@ import com.gintophilip.core.greeting.contract.GreetingPlugin;
 
 import java.io.File;
 import java.io.FilenameFilter;
+import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
@@ -24,6 +25,7 @@ public class PluginRepository {
     }
 
     public void loadPlugins() {
+        loadDefaultPlugin();
         File pluginDir = new File(PLUGIN_DIRECTORY);
 
         if (!pluginDir.exists() || !pluginDir.isDirectory()) {
@@ -44,6 +46,35 @@ public class PluginRepository {
         if (greetingPluginsMap.isEmpty()) {
             System.out.println("[PluginRepository] No valid GreetingPlugins loaded.");
         }
+    }
+
+    private void loadDefaultPlugin() {
+        String className = "com.gintophilip.defaultgreeting.EnglishGreeting";
+        Class<?> clazz = null;
+        try {
+            clazz = Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+        if (!GreetingPlugin.class.isAssignableFrom(clazz)) {
+            throw new IllegalArgumentException(className + " does not implement GreetingPlugin");
+        }
+
+        GreetingPlugin plugin = null;
+        try {
+            plugin = (GreetingPlugin) clazz.getDeclaredConstructor().newInstance();
+        } catch (InstantiationException e) {
+            throw new RuntimeException(e);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        } catch (InvocationTargetException e) {
+            throw new RuntimeException(e);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
+
+        addPlugin(plugin);
+
     }
 
     private void loadPluginFromJar(File jarFile) {
