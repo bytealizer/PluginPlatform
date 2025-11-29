@@ -26,6 +26,7 @@ public class Main {
     }
 
     private static void startCommandLoop() {
+        ApplicationUser currentUser = null;
         while (true) {
             System.out.print(">> ");
             String input = scanner.nextLine().trim();
@@ -36,13 +37,23 @@ public class Main {
                     System.exit(0);
                     break;
                 case "D":
-                    System.out.println("USer Details");
+
+                    if(currentUser!=null){
+                        System.out.println("USer Details");
+                        System.out.println("First Name: "+currentUser.getFirstName());
+                        System.out.println("Last Name: "+currentUser.getLastName());
+                        System.out.println("User Name: "+currentUser.getUserName());
+                        System.out.println("Preferred Language: "+currentUser.getPreferredLanguage());
+                    }else {
+                        System.out.println("Please login first");
+                    }
                     break;
 
                 case "L":
                     UserCredentials credentials = collectCredentials();
                     ApplicationUser user = new LoginService().login(credentials.getUsername(), credentials.getPassword());
                     if (user != null) {
+                        currentUser = user;
                         new UserGreeter().greetUser(user);
                     }else{
                         System.out.println("USer does not exist. check username and password is correct");
